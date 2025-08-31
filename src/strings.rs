@@ -1870,4 +1870,15 @@ pub mod commands {
 			CMD_GROUP_LOG,
 		)
 	}
+
+	pub fn unmark_all(key_config: &SharedKeyConfig) -> CommandText {
+		CommandText::new(
+			format!(
+				"Unmark all [{}]",
+				key_config.get_hint(key_config.keys.unmark_all)
+			),
+			"unmark all marked commits",
+			CMD_GROUP_GENERAL,
+		)
+	}
 }

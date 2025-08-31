@@ -470,6 +470,8 @@ impl Component for Revlog {
 					} else if self.can_close_search() {
 						self.list.set_highlighting(None);
 						self.search = LogSearch::Off;
+					} else if self.list.marked_count() > 0 {
+						self.list.clear_marked();
 					}
 					return Ok(EventState::Consumed);
 				} else if key_match(k, self.key_config.keys.copy) {
@@ -606,12 +608,23 @@ impl Component for Revlog {
 						return Ok(EventState::Consumed);
 					}
 				}
+				// // FIXME: does nothing
+				// else if key_match(
+				// 	k,
+				// 	self.key_config.keys.unmark_all,
+				// ) && self.list.marked_count() > 0
+				// 	&& !self.is_search_pending()
+				// {
+				// 	self.list.clear_marked();
+				// 	return Ok(EventState::Consumed);
+				// }
 			}
 		}
 
 		Ok(EventState::NotConsumed)
 	}
 
+	#[allow(clippy::too_many_lines)]
 	fn commands(
 		&self,
 		out: &mut Vec<CommandInfo>,
@@ -620,6 +633,19 @@ impl Component for Revlog {
 		if self.visible || force_all {
 			self.list.commands(out, force_all);
 		}
+
+		// add_commands! {
+		// 	out,
+		// 	{
+		// 		strings::commands::log_close_search(&self.key_config),
+		// 		true,
+		// 		(self.visible
+		// 			&& (self.can_close_search()
+		// 				|| self.is_search_pending()))
+		// 			|| force_all,
+
+		// 	}
+		// }
 
 		out.push(
 			CommandInfo::new(
@@ -728,6 +754,11 @@ impl Component for Revlog {
 			strings::commands::log_find_commit(&self.key_config),
 			self.can_start_search(),
 			self.visible || force_all,
+		));
+		out.push(CommandInfo::new(
+			strings::commands::unmark_all(&self.key_config),
+			self.list.marked_count() > 0,
+			(self.visible && !self.is_search_pending()) || force_all,
 		));
 
 		visibility_blocking(self)

@@ -182,6 +182,11 @@ impl Component for StashList {
 				selection_valid,
 				true,
 			));
+			out.push(CommandInfo::new(
+				strings::commands::unmark_all(&self.key_config),
+				self.list.marked_count() > 0,
+				true,
+			));
 		}
 
 		visibility_blocking(self)
@@ -214,6 +219,12 @@ impl Component for StashList {
 					self.key_config.keys.stash_open,
 				) {
 					self.inspect();
+				} else if key_match(
+					k,
+					self.key_config.keys.unmark_all,
+				) && self.list.marked_count() > 0
+				{
+					self.list.clear_marked();
 				}
 			}
 		}
